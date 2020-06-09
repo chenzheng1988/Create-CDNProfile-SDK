@@ -35,9 +35,6 @@ namespace ConsoleApp1
 
             CreateCdnProfile(cdn);
 
-            Console.WriteLine();
-
-            Console.WriteLine("Press Enter to end program.");
             Console.ReadLine();
         }
        
@@ -53,7 +50,6 @@ namespace ConsoleApp1
         private static void CreateCdnProfile(CdnManagementClient cdn)
         {
            
-            //Sku sku1 = new Sku(SkuName.StandardChinaCdn);
             Profile profile1 = new Profile(resourceLocation,new Sku(SkuName.StandardChinaCdn));
             cdn.Profiles.Create(resourceGroupName, profileName, profile1);
             
