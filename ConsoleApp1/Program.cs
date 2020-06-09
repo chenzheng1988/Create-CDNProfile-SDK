@@ -1,21 +1,63 @@
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Azure.Management.Cdn;
+using Microsoft.Azure.Management.Cdn.Models;
+using Microsoft.Azure.Management.Resources;
+using Microsoft.Azure.Management.Resources.Models;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Rest;
 
 namespace ConsoleApp1
 {
     class Program
     {
+        //Tenant app constants
+        private const string clientID = "ClientID";
+        private const string clientSecret = "ClientSecret"; //Only for service principals
+        private const string authority = "https://login.chinacloudapi.cn/TenantID";
+
+        //Application constants
+        private const string subscriptionId = "SubID";
+        private const string profileName = "profileName";
+        private const string resourceGroupName = "resourceGroupName";
+        private const string resourceLocation = "chinanorth";
+
+
         static void Main(string[] args)
         {
-            // The code provided will print ‘Hello World’ to the console.
-            // Press Ctrl+F5 (or go to Debug > Start Without Debugging) to run your app.
-            Console.WriteLine("Hello World!");
-            Console.ReadKey();
+            //Get a token
+            AuthenticationResult authResult = GetAccessToken();
 
-            // Go to http://aka.ms/dotnet-get-started-console to continue learning how to build a console app! 
+            // Create CDN client
+            CdnManagementClient cdn = new CdnManagementClient(new Uri("https://management.chinacloudapi.cn"), new TokenCredentials(authResult.AccessToken))
+            { SubscriptionId = subscriptionId };
+
+            CreateCdnProfile(cdn);
+
+            Console.WriteLine();
+
+            Console.WriteLine("Press Enter to end program.");
+            Console.ReadLine();
         }
+       
+        private static AuthenticationResult GetAccessToken()
+        {
+            AuthenticationContext authContext = new AuthenticationContext(authority);
+            ClientCredential credential = new ClientCredential(clientID, clientSecret);
+            AuthenticationResult authResult =
+                authContext.AcquireTokenAsync("https://management.chinacloudapi.cn/", credential).Result;
+
+            return authResult;
+        }
+        private static void CreateCdnProfile(CdnManagementClient cdn)
+        {
+           
+            //Sku sku1 = new Sku(SkuName.StandardChinaCdn);
+            Profile profile1 = new Profile(resourceLocation,new Sku(SkuName.StandardChinaCdn));
+            cdn.Profiles.Create(resourceGroupName, profileName, profile1);
+            
+        }
+
     }
 }
